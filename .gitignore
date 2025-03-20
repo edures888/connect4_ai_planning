@@ -1,2 +1,13 @@
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+
+.DS_Store
+Thumbs.db
+
 /log
 /log/*
+
+src/__pycache__/
