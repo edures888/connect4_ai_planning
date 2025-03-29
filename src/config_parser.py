@@ -62,6 +62,19 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu"
     )
+    parser.add_argument(
+        "--opponent-policy",
+        type=str,
+        default="random",
+        choices=["random", "minimax"],
+        help="the policy used by the opponent agent",
+    )
+    parser.add_argument(
+        "--minimax-depth",
+        type=int,
+        default=4,
+        help="the search depth for minimax policy",
+    )
     return parser
 
 
