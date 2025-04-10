@@ -11,3 +11,6 @@ Thumbs.db
 /log/*
 
 src/__pycache__/
+eval.ipynb
+minimax_example.ipynb
+src/policy/__pycache__/

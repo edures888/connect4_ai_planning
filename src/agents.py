@@ -12,9 +12,11 @@ from tianshou.policy import (
 )
 from tianshou.utils.net.common import Net
 
+from src.policy.dqn_mcts import DQNPolicyWithMCTS
+
 from .config_parser import get_args
 from .environment import get_env
-from .minimax_policy import MinimaxPolicy
+from .policy.minimax_policy import MinimaxPolicy
 
 
 def get_agents(
@@ -41,7 +43,7 @@ def get_agents(
         ).to(args.device)
         if optim is None:
             optim = torch.optim.Adam(net.parameters(), lr=args.lr)
-        agent_learn = DQNPolicy(
+        agent_learn = DQNPolicyWithMCTS(
             model=net,
             optim=optim,
             discount_factor=args.gamma,
@@ -56,21 +58,22 @@ def get_agents(
         if args.opponent_path:
             agent_opponent = deepcopy(agent_learn)
             agent_opponent.load_state_dict(torch.load(args.opponent_path))
-        else:
-            if args.opponent_policy == "minimax":
-                # Create a MinimaxPolicy instance
-                opponent_id = 1 if args.agent_id == 2 else 2
-                agent_opponent = MinimaxPolicy(
-                    action_space=env.action_space,
-                    max_depth=args.minimax_depth,
-                    player_id=opponent_id
-                )
-            else:  # Default to random policy
-                agent_opponent = RandomPolicy(action_space=env.action_space)
+        elif args.opponent_policy == "minimax":
+            # Create a MinimaxPolicy instance
+            opponent_id = 1 if args.agent_id == 2 else 2
+            agent_opponent = MinimaxPolicy(
+                action_space=env.action_space,
+                max_depth=args.minimax_depth,
+                player_id=opponent_id,
+            )
+        elif args.opponent_policy == "self":
+            agent_opponent = agent_learn
+        else:  # Default to random policy
+            agent_opponent = RandomPolicy(action_space=env.action_space)
 
     if args.agent_id == 1:
         agents = [agent_learn, agent_opponent]
     else:
         agents = [agent_opponent, agent_learn]
-    policy = MultiAgentPolicyManager(agents, env)
-    return policy, optim, env.agents
+    policy_manager = MultiAgentPolicyManager(agents, env)
+    return policy_manager, optim, env.agents
