@@ -422,8 +422,7 @@ class MCTSCollector(object):
         batch: Batch,
         state: Optional[Union[dict, Batch, np.ndarray]] = None,
     ):
-        action_dist = self.mcts.search()
-        actions = list(action_dist.keys())
-        probs = list(action_dist.values())
-        act = np.random.choice(actions, p=probs)
-        return self.policy(batch, state, action=act)
+        act = self.mcts.choose_action()
+        batch = self.policy(batch, state)
+        batch.act = act
+        return batch
